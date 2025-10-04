@@ -1,13 +1,15 @@
+// faq.ts
 import { defineType, defineField } from 'sanity';
 
 export default defineType({
   name: 'faq',
-  title: 'faq',
+  title: 'FAQ',
   type: 'document',
   fields: [
+    // 1. حقل اللغة (المتحكم الرئيسي)
     defineField({
       name: 'language',
-      title: 'اللغة',
+      title: 'Language',
       type: 'string',
       options: {
         list: [
@@ -19,37 +21,85 @@ export default defineType({
       initialValue: 'ar',
       validation: Rule => Rule.required()
     }),
+
+    // --- الحقول العربية ---
     defineField({
       name: 'question',
-      title: 'السؤال',
+      title: 'Question (Arabic)',
       type: 'string',
-      validation: Rule => Rule.required()
+      hidden: ({ document }) => document?.language !== 'ar',
+      validation: Rule =>
+        Rule.custom((value, { document }) => {
+          if (document?.language === 'ar' && !value) {
+            return 'السؤال (العربي) مطلوب'
+          }
+          return true
+        })
     }),
     defineField({
       name: 'answer',
-      title: 'الإجابة',
+      title: 'Answer (Arabic)',
       type: 'text',
-      validation: Rule => Rule.required()
+      hidden: ({ document }) => document?.language !== 'ar',
+      validation: Rule =>
+        Rule.custom((value, { document }) => {
+          if (document?.language === 'ar' && !value) {
+            return 'الإجابة (العربية) مطلوبة'
+          }
+          return true
+        })
     }),
-    // === تم تعديل هذا الحقل ===
+
+    // --- الحقول الإنجليزية ---
+    defineField({
+      name: 'questionEn',
+      title: 'Question (English)',
+      type: 'string',
+      hidden: ({ document }) => document?.language !== 'en',
+      validation: Rule =>
+        Rule.custom((value, { document }) => {
+          if (document?.language === 'en' && !value) {
+            return 'Question (English) is required'
+          }
+          return true
+        })
+    }),
+    defineField({
+      name: 'answerEn',
+      title: 'Answer (English)',
+      type: 'text',
+      hidden: ({ document }) => document?.language !== 'en',
+      validation: Rule =>
+        Rule.custom((value, { document }) => {
+          if (document?.language === 'en' && !value) {
+            return 'Answer (English) is required'
+          }
+          return true
+        })
+    }),
+
+    // --- الحقل المشترك (حقل نصي عادي) ---
     defineField({
       name: 'category',
-      title: 'الفئة',
-      type: 'string' // تم حذف جزء options ليصبح حقل نصي عادي
+      title: 'Category',
+      type: 'string', // عاد حقل نصي عادي كما طلبت
+      description: 'e.g., Technical, Billing, General'
     })
-    // === نهاية التعديل ===
   ],
   preview: {
     select: {
-      title: 'question',
-      subtitle: 'category',
-      language: 'language'
+      question: 'question',
+      questionEn: 'questionEn',
+      language: 'language',
+      category: 'category' // اختيار حقل الفئة مباشرة
     },
     prepare(selection) {
-      const { title, subtitle, language } = selection;
+      const { question, questionEn, language, category } = selection;
+      const displayQuestion = language === 'en' ? questionEn : question;
+
       return {
-        title: `${title} (${language === 'ar' ? 'العربية' : 'English'})`,
-        subtitle: subtitle
+        title: displayQuestion,
+        subtitle: `Category: ${category || 'Uncategorized'}`
       };
     }
   }

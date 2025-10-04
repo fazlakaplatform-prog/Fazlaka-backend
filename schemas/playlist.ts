@@ -6,33 +6,74 @@ export default defineType({
   title: 'Playlist',
   type: 'document',
   fields: [
+    // 1. حقل اللغة (المتحكم الرئيسي)
+    defineField({
+      name: 'language',
+      title: 'Language',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'العربية', value: 'ar' },
+          { title: 'English', value: 'en' }
+        ],
+        layout: 'radio' // لجعل الاختيار أوضح
+      },
+      initialValue: 'ar',
+      validation: (Rule) => Rule.required()
+    }),
+
+    // --- الحقول العربية ---
     defineField({
       name: 'title',
       title: 'Title (Arabic)',
       type: 'string',
-      validation: (Rule) => Rule.required()
-    }),
-    defineField({
-      name: 'titleEn',
-      title: 'Title (English)',
-      type: 'string'
-    }),
-    defineField({
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
-      options: { source: 'title' },
-      validation: (Rule) => Rule.required()
+      hidden: ({ document }) => document?.language !== 'ar', // إخفاء إذا لم تكن اللغة عربية
+      validation: (Rule) =>
+        Rule.custom((value, { document }) => {
+          if (document?.language === 'ar' && !value) {
+            return 'العنوان (العربي) مطلوب'
+          }
+          return true
+        })
     }),
     defineField({
       name: 'description',
       title: 'Description (Arabic)',
-      type: 'text'
+      type: 'text',
+      hidden: ({ document }) => document?.language !== 'ar' // إخفاء إذا لم تكن اللغة عربية
+    }),
+
+    // --- الحقول الإنجليزية ---
+    defineField({
+      name: 'titleEn',
+      title: 'Title (English)',
+      type: 'string',
+      hidden: ({ document }) => document?.language !== 'en', // إخفاء إذا لم تكن اللغة إنجليزية
+      validation: (Rule) =>
+        Rule.custom((value, { document }) => {
+          if (document?.language === 'en' && !value) {
+            return 'Title (English) is required'
+          }
+          return true
+        })
     }),
     defineField({
       name: 'descriptionEn',
       title: 'Description (English)',
-      type: 'text'
+      type: 'text',
+      hidden: ({ document }) => document?.language !== 'en' // إخفاء إذا لم تكن اللغة إنجليزية
+    }),
+
+    // --- الحقول المشتركة ---
+    defineField({
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      options: {
+        // تحديد المصدر ديناميكياً بناءً على اللغة
+        source: (doc) => doc.language === 'en' ? 'titleEn' : 'title'
+      },
+      validation: (Rule) => Rule.required()
     }),
     defineField({
       name: 'image',
@@ -40,32 +81,68 @@ export default defineType({
       type: 'image',
       options: { hotspot: true }
     }),
+    // --- العلاقات مع التصفية ---
     defineField({
       name: 'episodes',
       title: 'Episodes',
       type: 'array',
-      of: [defineArrayMember({ type: 'reference', to: [{ type: 'episode' }] })]
+      of: [
+        defineArrayMember({
+          type: 'reference',
+          to: [{ type: 'episode' }],
+          // فلترة الحلقات حسب لغة قائمة التشغيل
+          options: {
+            filter: ({ document }) => {
+              const playlistLanguage = document?.language
+              if (!playlistLanguage) return {}
+              return {
+                filter: `language == $lang`,
+                params: { lang: playlistLanguage }
+              }
+            }
+          }
+        })
+      ]
     }),
-    // إضافة حقل المقالات
     defineField({
       name: 'articles',
       title: 'Articles',
       type: 'array',
-      of: [defineArrayMember({ type: 'reference', to: [{ type: 'article' }] })]
-    }),
-    // إضافة حقل اللغة
-    defineField({
-      name: 'language',
-      title: 'Language',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Arabic', value: 'ar' },
-          { title: 'English', value: 'en' }
-        ]
-      },
-      initialValue: 'ar',
-      validation: (Rule) => Rule.required()
+      of: [
+        defineArrayMember({
+          type: 'reference',
+          to: [{ type: 'article' }],
+          // فلترة المقالات حسب لغة قائمة التشغيل
+          options: {
+            filter: ({ document }) => {
+              const playlistLanguage = document?.language
+              if (!playlistLanguage) return {}
+              return {
+                filter: `language == $lang`,
+                params: { lang: playlistLanguage }
+              }
+            }
+          }
+        })
+      ]
     })
-  ]
+  ],
+  // ====> إضافة معاينة للقائمة <====
+  preview: {
+    select: {
+      title: 'title',
+      titleEn: 'titleEn',
+      language: 'language',
+      image: 'image'
+    },
+    prepare(selection) {
+      const { title, titleEn, language, image } = selection
+      const displayTitle = language === 'en' ? titleEn : title
+      
+      return {
+        title: displayTitle || 'Untitled Playlist',
+        media: image
+      }
+    }
+  }
 })
