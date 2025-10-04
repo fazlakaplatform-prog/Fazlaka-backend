@@ -3,7 +3,7 @@ import { defineField, defineType } from 'sanity'
 
 export default defineType({
   name: 'termsContent',
-  title: 'محتوى الشروط والأحكام',
+  title: 'terms-content',
   type: 'document',
   fields: [
     defineField({

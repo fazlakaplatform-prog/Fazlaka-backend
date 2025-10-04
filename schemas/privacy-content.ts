@@ -3,7 +3,7 @@ import { defineField, defineType } from 'sanity'
 
 export default defineType({
   name: 'privacyContent',
-  title: 'محتوى سياسة الخصوصية',
+  title: 'privacy-content',
   type: 'document',
   fields: [
     defineField({

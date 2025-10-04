@@ -2,7 +2,7 @@ import { defineType, defineField } from 'sanity';
 
 export default defineType({
   name: 'faq',
-  title: 'الأسئلة الشائعة',
+  title: 'faq',
   type: 'document',
   fields: [
     defineField({
