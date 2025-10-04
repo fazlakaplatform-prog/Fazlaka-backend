@@ -24,6 +24,12 @@ export default defineType({
       validation: (Rule) => Rule.required()
     }),
     defineField({
+      name: 'userId',
+      title: 'User ID',
+      type: 'string',
+      description: 'ID of the user from Clerk authentication system'
+    }),
+    defineField({
       name: 'episode',
       title: 'Episode',
       type: 'reference',
@@ -34,6 +40,13 @@ export default defineType({
       title: 'Article',
       type: 'reference',
       to: [{ type: 'article' }]
+    }),
+    defineField({
+      name: 'parentComment',
+      title: 'Parent Comment',
+      type: 'reference',
+      to: [{ type: 'comment' }],
+      description: 'Reference to the parent comment for replies'
     }),
     defineField({
       name: 'createdAt',
