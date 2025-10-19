@@ -22,16 +22,25 @@ export default defineType({
       title: 'Article',
       type: 'reference',
       to: [{ type: 'article' }]
+    }),
+    // تم إضافة حقل createdAt ليتوافق مع خدمة Dart
+    defineField({
+      name: 'createdAt',
+      title: 'Created At',
+      type: 'datetime',
+      initialValue: () => new Date().toISOString(),
+      readOnly: true, // جعله للقراءة فقط لأنه يتم تحديده عبر الـ API
     })
   ],
   validation: (Rule) =>
-    Rule.custom((field) => {
-      if (!field?.episode && !field?.article) {
+    Rule.custom((fields) => {
+      // التحقق من أن المستخدم يجب أن يختار حلقة أو مقالة، وليس كليهما أو لا شيء منهما
+      if (!fields?.episode && !fields?.article) {
         return 'يجب اختيار حلقة أو مقالة على الأقل'
       }
-      if (field?.episode && field?.article) {
+      if (fields?.episode && fields?.article) {
         return 'لا يمكن اختيار حلقة ومقالة معاً'
       }
       return true
     })
-  })
+})
