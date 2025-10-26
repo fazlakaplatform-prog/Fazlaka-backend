@@ -11,6 +11,7 @@ import terms from './terms-content';
 import privacy from './privacy-content';
 import heroSlider from './heroSlider';
 import socialLinks from './socialLinks';
+import user from './user';
 
 // Then export them as an array
 export const schemaTypes = [
@@ -26,5 +27,6 @@ export const schemaTypes = [
   privacy,
   heroSlider,
   socialLinks,
-
+  user,
+  
 ]
