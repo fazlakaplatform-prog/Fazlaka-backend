@@ -1,5 +1,6 @@
 // schemas/teamMember.ts
 import { defineField, defineType } from 'sanity'
+import React from 'react'
 
 export default defineType({
   name: 'teamMember',
@@ -48,22 +49,10 @@ export default defineType({
       type: 'text',
     }),
     defineField({
-      name: 'image',
-      title: 'الصورة الشخصية',
-      type: 'image',
-      options: {
-        hotspot: true,
-      },
-      fields: [
-        {
-          name: 'alt',
-          type: 'string',
-          title: 'النص البديل',
-          options: {
-            isHighlighted: true,
-          },
-        },
-      ],
+      name: 'imageUrl',
+      title: 'رابط الصورة الشخصية',
+      type: 'url',
+      description: 'URL for the team member profile image'
     }),
     defineField({
       name: 'order',
@@ -120,8 +109,26 @@ export default defineType({
   preview: {
     select: {
       title: 'name',
-      media: 'image',
+      imageUrl: 'imageUrl',
       subtitle: 'role',
     },
+    prepare(selection) {
+      const { title, imageUrl, subtitle } = selection
+
+      const PreviewImage = () => {
+        if (!imageUrl) return null
+        return React.createElement('img', {
+          src: imageUrl,
+          style: { objectFit: 'cover', width: '100%', height: '100%' },
+          alt: title || 'Team member'
+        })
+      }
+
+      return {
+        title: title || 'Untitled',
+        subtitle: subtitle,
+        media: PreviewImage
+      }
+    }
   },
 })

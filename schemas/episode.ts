@@ -1,5 +1,6 @@
-// schema/episode.js
+// schema/episode.ts
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import React from 'react' // Import React
 
 export default defineType({
   name: 'episode',
@@ -94,10 +95,10 @@ export default defineType({
       type: 'url'
     }),
     defineField({
-      name: 'thumbnail',
-      title: 'Thumbnail',
-      type: 'image',
-      options: { hotspot: true }
+      name: 'thumbnailUrl',
+      title: 'Thumbnail URL',
+      type: 'url',
+      description: 'URL for the episode thumbnail'
     }),
     // --- العلاقات مع التصفية ---
     defineField({
@@ -172,14 +173,24 @@ export default defineType({
       title: 'title',
       titleEn: 'titleEn',
       language: 'language',
-      thumbnail: 'thumbnail'
+      thumbnailUrl: 'thumbnailUrl'
     },
     prepare(selection) {
-      const { title, titleEn, language, thumbnail } = selection
+      const { title, titleEn, language, thumbnailUrl } = selection
       const displayTitle = language === 'en' ? titleEn : title
+
+      const PreviewImage = () => {
+        if (!thumbnailUrl) return null
+        return React.createElement('img', {
+          src: thumbnailUrl,
+          style: { objectFit: 'cover', width: '100%', height: '100%' },
+          alt: displayTitle || 'Preview'
+        })
+      }
+
       return {
         title: displayTitle || 'Untitled',
-        media: thumbnail
+        media: PreviewImage // Pass the component, not the URL string
       }
     }
   }

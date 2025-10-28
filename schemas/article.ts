@@ -1,5 +1,6 @@
-// schema/article.js
+// schema/article.ts
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import React from 'react' // Import React
 
 export default defineType({
   name: 'article',
@@ -89,10 +90,10 @@ export default defineType({
       validation: (Rule) => Rule.required()
     }),
     defineField({
-      name: 'featuredImage',
-      title: 'Featured Image',
-      type: 'image',
-      options: { hotspot: true }
+      name: 'featuredImageUrl',
+      title: 'Featured Image URL',
+      type: 'url',
+      description: 'URL for the featured image'
     }),
     // --- العلاقات مع التصفية ---
     defineField({
@@ -140,14 +141,25 @@ export default defineType({
       title: 'title',
       titleEn: 'titleEn',
       language: 'language',
-      featuredImage: 'featuredImage'
+      featuredImageUrl: 'featuredImageUrl'
     },
     prepare(selection) {
-      const { title, titleEn, language, featuredImage } = selection
+      const { title, titleEn, language, featuredImageUrl } = selection
       const displayTitle = language === 'en' ? titleEn : title
+
+      // Create a simple component for the preview image
+      const PreviewImage = () => {
+        if (!featuredImageUrl) return null
+        return React.createElement('img', {
+          src: featuredImageUrl,
+          style: { objectFit: 'cover', width: '100%', height: '100%' },
+          alt: displayTitle || 'Preview'
+        })
+      }
+
       return {
         title: displayTitle || 'Untitled',
-        media: featuredImage
+        media: PreviewImage // Pass the component, not the URL string
       }
     }
   }

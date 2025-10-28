@@ -1,5 +1,6 @@
-// playlist.ts
+// schema/playlist.ts
 import { defineType, defineField, defineArrayMember } from 'sanity'
+import React from 'react' // Import React
 
 export default defineType({
   name: 'playlist',
@@ -76,10 +77,10 @@ export default defineType({
       validation: (Rule) => Rule.required()
     }),
     defineField({
-      name: 'image',
-      title: 'Image',
-      type: 'image',
-      options: { hotspot: true }
+      name: 'imageUrl',
+      title: 'Image URL',
+      type: 'url',
+      description: 'URL for the playlist image'
     }),
     // --- العلاقات مع التصفية ---
     defineField({
@@ -133,15 +134,24 @@ export default defineType({
       title: 'title',
       titleEn: 'titleEn',
       language: 'language',
-      image: 'image'
+      imageUrl: 'imageUrl'
     },
     prepare(selection) {
-      const { title, titleEn, language, image } = selection
+      const { title, titleEn, language, imageUrl } = selection
       const displayTitle = language === 'en' ? titleEn : title
+      
+      const PreviewImage = () => {
+        if (!imageUrl) return null
+        return React.createElement('img', {
+          src: imageUrl,
+          style: { objectFit: 'cover', width: '100%', height: '100%' },
+          alt: displayTitle || 'Preview'
+        })
+      }
       
       return {
         title: displayTitle || 'Untitled Playlist',
-        media: image
+        media: PreviewImage // Pass the component, not the URL string
       }
     }
   }
