@@ -1,4 +1,3 @@
-// sanity/schemas/heroSlider.ts
 import { defineType, defineField } from 'sanity';
 
 export default defineType({
@@ -100,28 +99,20 @@ export default defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
-      name: 'image',
-      title: 'Image',
-      type: 'image',
-      description: 'Upload an image for the slide',
-      options: { hotspot: true },
+      name: 'image', // تغيير الاسم من imageUrl إلى image
+      title: 'Image URL',
+      type: 'url',
+      description: 'URL for the slide image',
       hidden: ({ document }) => document?.mediaType !== 'image'
-    }),
-    defineField({
-      name: 'video',
-      title: 'Video',
-      type: 'file',
-      description: 'Upload a video for the slide',
-      options: { accept: 'video/*' },
-      hidden: ({ document }) => document?.mediaType !== 'video'
     }),
     defineField({
       name: 'videoUrl',
       title: 'Video URL',
       type: 'url',
-      description: 'External video URL (YouTube, Vimeo, etc.)',
+      description: 'URL for the slide video (e.g., direct .mp4 link, YouTube, Vimeo)',
       hidden: ({ document }) => document?.mediaType !== 'video'
     }),
+    
     // --- حقل الرابط مع حقول داخلية متغيرة حسب اللغة ---
     defineField({
       name: 'link',
@@ -162,16 +153,16 @@ export default defineType({
     select: {
       title: 'title',
       titleEn: 'titleEn',
-      media: 'image',
+      image: 'image', // تغيير من imageUrl إلى image
       mediaType: 'mediaType',
       language: 'language'
     },
     prepare(selection) {
-      const { title, titleEn, media, mediaType, language } = selection;
+      const { title, titleEn, image, mediaType, language } = selection;
       return {
         title: language === 'en' ? titleEn : title,
         subtitle: `${mediaType === 'image' ? 'Image' : 'Video'} Slide (${language === 'ar' ? 'Arabic' : 'English'})`,
-        media: mediaType === 'image' ? media : null
+        media: mediaType === 'image' && image ? { src: image } : null
       }
     }
   }
