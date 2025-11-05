@@ -7,11 +7,12 @@ import favorite from './favorite'
 import playlist from './playlist'
 import teamMember from './teamMember'
 import faqSchema from './faq';
-import terms from './terms-content';
-import privacy from './privacy-content';
+import terms from './termsContent';
+import privacy from './privacyContent';
 import heroSlider from './heroSlider';
 import socialLinks from './socialLinks';
 import user from './user';
+import userNotification from './userNotification';
 
 // Then export them as an array
 export const schemaTypes = [
@@ -28,5 +29,5 @@ export const schemaTypes = [
   heroSlider,
   socialLinks,
   user,
-  
+  userNotification
 ]

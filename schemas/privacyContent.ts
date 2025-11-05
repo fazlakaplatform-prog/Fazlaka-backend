@@ -1,45 +1,29 @@
-// sanity/schemas/documents/privacy-content.ts
 import { defineField, defineType } from 'sanity'
 
 export default defineType({
   name: 'privacyContent',
-  title: 'privacy-content',
+  title: 'Privacy Content',
   type: 'document',
   fields: [
     defineField({
       name: 'sectionType',
-      title: 'نوع القسم',
+      title: 'Section Type',
       type: 'string',
       options: {
         list: [
-          { title: 'سياسة الخصوصية الرئيسية', value: 'mainPolicy' },
-          { title: 'حق المستخدم', value: 'userRight' },
-          { title: 'نوع البيانات', value: 'dataType' },
-          { title: 'إجراء أمني', value: 'securityMeasure' },
+          { title: 'Main Privacy Policy', value: 'mainPolicy' },
+          { title: 'User Right', value: 'userRight' },
+          { title: 'Data Type', value: 'dataType' },
+          { title: 'Security Measure', value: 'securityMeasure' },
         ],
       },
       validation: (Rule) => Rule.required(),
     }),
     
-    // حقول اللغة
-    defineField({
-      name: 'language',
-      title: 'Language',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Arabic', value: 'ar' },
-          { title: 'English', value: 'en' }
-        ]
-      },
-      initialValue: 'ar',
-      validation: (Rule) => Rule.required()
-    }),
-    
     // حقول مشتركة
     defineField({
       name: 'title',
-      title: 'العنوان (Arabic)',
+      title: 'Title (Arabic)',
       type: 'string',
       hidden: ({ parent }) => parent?.sectionType !== 'mainPolicy' && 
                                parent?.sectionType !== 'userRight' &&
@@ -67,11 +51,10 @@ export default defineType({
                                parent?.sectionType !== 'securityMeasure',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
         if ((sectionType === 'mainPolicy' || 
              sectionType === 'userRight' ||
              sectionType === 'dataType' ||
-             sectionType === 'securityMeasure') && language === 'en' && !value) {
+             sectionType === 'securityMeasure') && !value) {
           return 'This field is required'
         }
         return true
@@ -80,18 +63,18 @@ export default defineType({
     
     defineField({
       name: 'content',
-      title: 'المحتوى (Arabic)',
+      title: 'Content (Arabic)',
       type: 'array',
       of: [
         {
           type: 'block',
-          styles: [{ title: 'عادي', value: 'normal' }],
-          lists: [{ title: 'قائمة', value: 'bullet' }],
+          styles: [{ title: 'Normal', value: 'normal' }],
+          lists: [{ title: 'Bullet', value: 'bullet' }],
           marks: {
             decorators: [
-              { title: 'عريض', value: 'strong' },
-              { title: 'مائل', value: 'em' },
-              { title: 'تحته خط', value: 'underline' },
+              { title: 'Bold', value: 'strong' },
+              { title: 'Italic', value: 'em' },
+              { title: 'Underline', value: 'underline' },
             ],
           },
         },
@@ -99,8 +82,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'mainPolicy',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'mainPolicy' && language === 'ar' && (!value || value.length === 0)) {
+        if (sectionType === 'mainPolicy' && (!value || value.length === 0)) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -128,8 +110,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'mainPolicy',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'mainPolicy' && language === 'en' && (!value || value.length === 0)) {
+        if (sectionType === 'mainPolicy' && (!value || value.length === 0)) {
           return 'This field is required'
         }
         return true
@@ -138,9 +119,9 @@ export default defineType({
     
     defineField({
       name: 'icon',
-      title: 'الأيقونة',
+      title: 'Icon',
       type: 'string',
-      description: 'رمز إيموجي يمثل القسم',
+      description: 'Emoji icon representing the section',
       hidden: ({ parent }) => parent?.sectionType !== 'userRight' &&
                                parent?.sectionType !== 'dataType' &&
                                parent?.sectionType !== 'securityMeasure',
@@ -157,17 +138,16 @@ export default defineType({
     
     defineField({
       name: 'description',
-      title: 'الوصف (Arabic)',
+      title: 'Description (Arabic)',
       type: 'text',
       hidden: ({ parent }) => parent?.sectionType !== 'userRight' &&
                                parent?.sectionType !== 'dataType' &&
                                parent?.sectionType !== 'securityMeasure',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
         if ((sectionType === 'userRight' ||
              sectionType === 'dataType' ||
-             sectionType === 'securityMeasure') && language === 'ar' && !value) {
+             sectionType === 'securityMeasure') && !value) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -183,10 +163,9 @@ export default defineType({
                                parent?.sectionType !== 'securityMeasure',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
         if ((sectionType === 'userRight' ||
              sectionType === 'dataType' ||
-             sectionType === 'securityMeasure') && language === 'en' && !value) {
+             sectionType === 'securityMeasure') && !value) {
           return 'This field is required'
         }
         return true
@@ -196,14 +175,14 @@ export default defineType({
     // حقول خاصة بأنواع البيانات
     defineField({
       name: 'color',
-      title: 'لون الخلفية',
+      title: 'Background Color',
       type: 'string',
       options: {
         list: [
-          { title: 'أزرق', value: 'bg-blue-100' },
-          { title: 'أخضر', value: 'bg-green-100' },
-          { title: 'بنفسجي', value: 'bg-purple-100' },
-          { title: 'أصفر', value: 'bg-yellow-100' },
+          { title: 'Blue', value: 'bg-blue-100' },
+          { title: 'Green', value: 'bg-green-100' },
+          { title: 'Purple', value: 'bg-purple-100' },
+          { title: 'Yellow', value: 'bg-yellow-100' },
         ],
       },
       hidden: ({ parent }) => parent?.sectionType !== 'dataType',
@@ -218,14 +197,14 @@ export default defineType({
     
     defineField({
       name: 'textColor',
-      title: 'لون النص',
+      title: 'Text Color',
       type: 'string',
       options: {
         list: [
-          { title: 'أزرق', value: 'text-blue-800' },
-          { title: 'أخضر', value: 'text-green-800' },
-          { title: 'بنفسجي', value: 'text-purple-800' },
-          { title: 'أصفر', value: 'text-yellow-800' },
+          { title: 'Blue', value: 'text-blue-800' },
+          { title: 'Green', value: 'text-green-800' },
+          { title: 'Purple', value: 'text-purple-800' },
+          { title: 'Yellow', value: 'text-yellow-800' },
         ],
       },
       hidden: ({ parent }) => parent?.sectionType !== 'dataType',
@@ -240,7 +219,7 @@ export default defineType({
     
     defineField({
       name: 'lastUpdated',
-      title: 'تاريخ آخر تحديث',
+      title: 'Last Updated Date',
       type: 'datetime',
       hidden: ({ parent }) => parent?.sectionType !== 'mainPolicy',
       validation: (Rule) => Rule.custom((value, context) => {
@@ -254,7 +233,7 @@ export default defineType({
   ],
   orderings: [
     {
-      title: 'نوع القسم، ثم العنوان',
+      title: 'Section Type, then Title',
       name: 'sectionTypeThenTitle',
       by: [
         { field: 'sectionType', direction: 'asc' },

@@ -1,67 +1,73 @@
-// schemas/teamMember.ts
 import { defineField, defineType } from 'sanity'
 import React from 'react'
 
 export default defineType({
   name: 'teamMember',
-  title: 'team-Member',
+  title: 'Team Member',
   type: 'document',
   fields: [
     defineField({
       name: 'name',
-      title: 'الاسم',
+      title: 'Name (Arabic)',
       type: 'string',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'nameEn',
-      title: 'الاسم (بالإنجليزية)',
+      title: 'Name (English)',
       type: 'string',
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'slug',
-      title: 'الرابط',
+      title: 'Slug',
       type: 'slug',
       options: {
-        source: 'name',
+        source: (doc) => doc.nameEn || doc.name,
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'role',
-      title: 'المنصب',
+      title: 'Role (Arabic)',
       type: 'string',
     }),
     defineField({
       name: 'roleEn',
-      title: 'المنصب (بالإنجليزية)',
+      title: 'Role (English)',
       type: 'string',
     }),
     defineField({
       name: 'bio',
-      title: 'السيرة الذاتية',
+      title: 'Bio (Arabic)',
       type: 'text',
     }),
     defineField({
       name: 'bioEn',
-      title: 'السيرة الذاتية (بالإنجليزية)',
+      title: 'Bio (English)',
       type: 'text',
     }),
     defineField({
       name: 'imageUrl',
-      title: 'رابط الصورة الشخصية',
+      title: 'Profile Image URL (Arabic)',
       type: 'url',
-      description: 'URL for the team member profile image'
+      description: 'URL for the team member profile image in Arabic'
+    }),
+    defineField({
+      name: 'imageUrlEn',
+      title: 'Profile Image URL (English)',
+      type: 'url',
+      description: 'URL for the team member profile image in English'
     }),
     defineField({
       name: 'order',
-      title: 'الترتيب',
+      title: 'Order',
       type: 'number',
     }),
     defineField({
       name: 'socialMedia',
-      title: 'وسائل التواصل الاجتماعي',
+      title: 'Social Media',
       type: 'array',
       of: [
         {
@@ -71,62 +77,55 @@ export default defineType({
             {
               name: 'platform',
               type: 'string',
-              title: 'المنصة',
+              title: 'Platform',
               options: {
                 list: [
-                  { title: 'فيسبوك', value: 'facebook' },
-                  { title: 'تويتر', value: 'twitter' },
-                  { title: 'انستغرام', value: 'instagram' },
-                  { title: 'لينكدإن', value: 'linkedin' },
-                  { title: 'يوتيوب', value: 'youtube' },
-                  { title: 'تيك توك', value: 'tiktok' },
+                  { title: 'Facebook', value: 'facebook' },
+                  { title: 'Twitter', value: 'twitter' },
+                  { title: 'Instagram', value: 'instagram' },
+                  { title: 'LinkedIn', value: 'linkedin' },
+                  { title: 'YouTube', value: 'youtube' },
+                  { title: 'TikTok', value: 'tiktok' },
                 ],
               },
             },
             {
               name: 'url',
               type: 'url',
-              title: 'الرابط',
+              title: 'URL',
             },
           ],
         },
       ],
     }),
-    defineField({
-      name: 'language',
-      title: 'اللغة',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'العربية', value: 'ar' },
-          { title: 'English', value: 'en' },
-        ],
-      },
-      initialValue: 'ar',
-      validation: (Rule) => Rule.required(),
-    }),
   ],
   preview: {
     select: {
-      title: 'name',
+      name: 'name',
+      nameEn: 'nameEn',
       imageUrl: 'imageUrl',
-      subtitle: 'role',
+      imageUrlEn: 'imageUrlEn',
+      role: 'role',
+      roleEn: 'roleEn',
     },
     prepare(selection) {
-      const { title, imageUrl, subtitle } = selection
+      const { name, nameEn, imageUrl, imageUrlEn, role, roleEn } = selection
+      const displayName = `${name || 'Untitled'} / ${nameEn || 'Untitled'}`
+      const displayRole = role || roleEn || ''
+      const previewImageUrl = imageUrl || imageUrlEn
 
       const PreviewImage = () => {
-        if (!imageUrl) return null
+        if (!previewImageUrl) return null
         return React.createElement('img', {
-          src: imageUrl,
+          src: previewImageUrl,
           style: { objectFit: 'cover', width: '100%', height: '100%' },
-          alt: title || 'Team member'
+          alt: displayName || 'Team member'
         })
       }
 
       return {
-        title: title || 'Untitled',
-        subtitle: subtitle,
+        title: displayName,
+        subtitle: displayRole,
         media: PreviewImage
       }
     }

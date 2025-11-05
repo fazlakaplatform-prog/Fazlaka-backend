@@ -1,56 +1,38 @@
-// sanity/schemas/documents/terms-content.ts
 import { defineField, defineType } from 'sanity'
 
 export default defineType({
   name: 'termsContent',
-  title: 'terms-content',
+  title: 'Terms Content',
   type: 'document',
   fields: [
     defineField({
       name: 'sectionType',
-      title: 'نوع القسم',
+      title: 'Section Type',
       type: 'string',
       options: {
         list: [
-          { title: 'شروط وأحكام رئيسية', value: 'mainTerms' },
-          { title: 'مصطلح قانوني', value: 'legalTerm' },
-          { title: 'حقوق ومسؤوليات', value: 'rightsResponsibility' },
-          { title: 'سياسة إضافية', value: 'additionalPolicy' },
-          { title: 'إعدادات الموقع', value: 'siteSettings' },
+          { title: 'Main Terms and Conditions', value: 'mainTerms' },
+          { title: 'Legal Term', value: 'legalTerm' },
+          { title: 'Rights and Responsibilities', value: 'rightsResponsibility' },
+          { title: 'Additional Policy', value: 'additionalPolicy' },
+          { title: 'Site Settings', value: 'siteSettings' },
         ],
       },
       validation: (Rule) => Rule.required(),
     }),
     
-    // حقول اللغة
-    defineField({
-      name: 'language',
-      title: 'Language',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Arabic', value: 'ar' },
-          { title: 'English', value: 'en' }
-        ]
-      },
-      initialValue: 'ar',
-      validation: (Rule) => Rule.required()
-    }),
-    
     // حقول مشتركة
     defineField({
       name: 'title',
-      title: 'العنوان (Arabic)',
+      title: 'Title (Arabic)',
       type: 'string',
       hidden: ({ parent }) => parent?.sectionType !== 'mainTerms' && 
                                parent?.sectionType !== 'rightsResponsibility' && 
                                parent?.sectionType !== 'additionalPolicy',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if ((sectionType === 'mainTerms' || sectionType === 'rightsResponsibility' || sectionType === 'additionalPolicy') && 
-            ((language === 'ar' && !value) || (language === 'en' && !value))) {
-          return language === 'ar' ? 'هذا الحقل مطلوب' : 'This field is required'
+        if ((sectionType === 'mainTerms' || sectionType === 'rightsResponsibility' || sectionType === 'additionalPolicy') && !value) {
+          return 'هذا الحقل مطلوب'
         }
         return true
       }),
@@ -65,9 +47,7 @@ export default defineType({
                                parent?.sectionType !== 'additionalPolicy',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if ((sectionType === 'mainTerms' || sectionType === 'rightsResponsibility' || sectionType === 'additionalPolicy') && 
-            language === 'en' && !value) {
+        if ((sectionType === 'mainTerms' || sectionType === 'rightsResponsibility' || sectionType === 'additionalPolicy') && !value) {
           return 'This field is required'
         }
         return true
@@ -76,18 +56,18 @@ export default defineType({
     
     defineField({
       name: 'content',
-      title: 'المحتوى (Arabic)',
+      title: 'Content (Arabic)',
       type: 'array',
       of: [
         {
           type: 'block',
-          styles: [{ title: 'عادي', value: 'normal' }],
-          lists: [{ title: 'قائمة', value: 'bullet' }],
+          styles: [{ title: 'Normal', value: 'normal' }],
+          lists: [{ title: 'Bullet', value: 'bullet' }],
           marks: {
             decorators: [
-              { title: 'عريض', value: 'strong' },
-              { title: 'مائل', value: 'em' },
-              { title: 'تحته خط', value: 'underline' },
+              { title: 'Bold', value: 'strong' },
+              { title: 'Italic', value: 'em' },
+              { title: 'Underline', value: 'underline' },
             ],
           },
         },
@@ -95,8 +75,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'mainTerms',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'mainTerms' && language === 'ar' && (!value || value.length === 0)) {
+        if (sectionType === 'mainTerms' && (!value || value.length === 0)) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -124,8 +103,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'mainTerms',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'mainTerms' && language === 'en' && (!value || value.length === 0)) {
+        if (sectionType === 'mainTerms' && (!value || value.length === 0)) {
           return 'This field is required'
         }
         return true
@@ -135,13 +113,12 @@ export default defineType({
     // حقول خاصة بالمصطلحات القانونية
     defineField({
       name: 'term',
-      title: 'المصطلح (Arabic)',
+      title: 'Term (Arabic)',
       type: 'string',
       hidden: ({ parent }) => parent?.sectionType !== 'legalTerm',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'legalTerm' && language === 'ar' && !value) {
+        if (sectionType === 'legalTerm' && !value) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -155,8 +132,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'legalTerm',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'legalTerm' && language === 'en' && !value) {
+        if (sectionType === 'legalTerm' && !value) {
           return 'This field is required'
         }
         return true
@@ -165,13 +141,12 @@ export default defineType({
     
     defineField({
       name: 'definition',
-      title: 'التعريف (Arabic)',
+      title: 'Definition (Arabic)',
       type: 'text',
       hidden: ({ parent }) => parent?.sectionType !== 'legalTerm',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'legalTerm' && language === 'ar' && !value) {
+        if (sectionType === 'legalTerm' && !value) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -185,8 +160,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'legalTerm',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'legalTerm' && language === 'en' && !value) {
+        if (sectionType === 'legalTerm' && !value) {
           return 'This field is required'
         }
         return true
@@ -195,9 +169,9 @@ export default defineType({
     
     defineField({
       name: 'icon',
-      title: 'الأيقونة',
+      title: 'Icon',
       type: 'string',
-      description: 'رمز إيموجي يمثل المصطلح أو القسم',
+      description: 'Emoji icon representing the term or section',
       hidden: ({ parent }) => parent?.sectionType !== 'legalTerm' && 
                                parent?.sectionType !== 'rightsResponsibility' && 
                                parent?.sectionType !== 'additionalPolicy',
@@ -213,13 +187,13 @@ export default defineType({
     // حقول خاصة بالحقوق والمسؤوليات
     defineField({
       name: 'rightsType',
-      title: 'نوع الحقوق/المسؤوليات',
+      title: 'Rights/Responsibilities Type',
       type: 'string',
       options: {
         list: [
-          { title: 'حقوق المستخدم', value: 'userRights' },
-          { title: 'مسؤوليات المستخدم', value: 'userResponsibilities' },
-          { title: 'حقوق الشركة', value: 'companyRights' },
+          { title: 'User Rights', value: 'userRights' },
+          { title: 'User Responsibilities', value: 'userResponsibilities' },
+          { title: 'Company Rights', value: 'companyRights' },
         ],
       },
       hidden: ({ parent }) => parent?.sectionType !== 'rightsResponsibility',
@@ -234,7 +208,7 @@ export default defineType({
     
     defineField({
       name: 'items',
-      title: 'العناصر (Arabic)',
+      title: 'Items (Arabic)',
       type: 'array',
       of: [
         {
@@ -242,7 +216,7 @@ export default defineType({
           fields: [
             {
               name: 'item',
-              title: 'العنصر',
+              title: 'Item',
               type: 'string',
               validation: (Rule) => Rule.required(),
             },
@@ -252,8 +226,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'rightsResponsibility',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'rightsResponsibility' && language === 'ar' && (!value || value.length === 0)) {
+        if (sectionType === 'rightsResponsibility' && (!value || value.length === 0)) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -262,7 +235,7 @@ export default defineType({
     
     defineField({
       name: 'itemsEn',
-      title: 'العناصر (English)',
+      title: 'Items (English)',
       type: 'array',
       of: [
         {
@@ -280,8 +253,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'rightsResponsibility',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'rightsResponsibility' && language === 'en' && (!value || value.length === 0)) {
+        if (sectionType === 'rightsResponsibility' && (!value || value.length === 0)) {
           return 'This field is required'
         }
         return true
@@ -290,13 +262,13 @@ export default defineType({
     
     defineField({
       name: 'color',
-      title: 'لون الخلفية',
+      title: 'Background Color',
       type: 'string',
       options: {
         list: [
-          { title: 'أخضر', value: 'bg-green-50' },
-          { title: 'أصفر', value: 'bg-yellow-50' },
-          { title: 'أزرق', value: 'bg-blue-50' },
+          { title: 'Green', value: 'bg-green-50' },
+          { title: 'Yellow', value: 'bg-yellow-50' },
+          { title: 'Blue', value: 'bg-blue-50' },
         ],
       },
       hidden: ({ parent }) => parent?.sectionType !== 'rightsResponsibility',
@@ -311,13 +283,13 @@ export default defineType({
     
     defineField({
       name: 'borderColor',
-      title: 'لون الحدود',
+      title: 'Border Color',
       type: 'string',
       options: {
         list: [
-          { title: 'أخضر', value: 'border-green-200' },
-          { title: 'أصفر', value: 'border-yellow-200' },
-          { title: 'أزرق', value: 'border-blue-200' },
+          { title: 'Green', value: 'border-green-200' },
+          { title: 'Yellow', value: 'border-yellow-200' },
+          { title: 'Blue', value: 'border-blue-200' },
         ],
       },
       hidden: ({ parent }) => parent?.sectionType !== 'rightsResponsibility',
@@ -333,13 +305,12 @@ export default defineType({
     // حقول خاصة بالسياسات الإضافية
     defineField({
       name: 'description',
-      title: 'الوصف (Arabic)',
+      title: 'Description (Arabic)',
       type: 'text',
       hidden: ({ parent }) => parent?.sectionType !== 'additionalPolicy',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'additionalPolicy' && language === 'ar' && !value) {
+        if (sectionType === 'additionalPolicy' && !value) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -353,8 +324,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'additionalPolicy',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'additionalPolicy' && language === 'en' && !value) {
+        if (sectionType === 'additionalPolicy' && !value) {
           return 'This field is required'
         }
         return true
@@ -363,13 +333,12 @@ export default defineType({
     
     defineField({
       name: 'linkText',
-      title: 'نص الرابط (Arabic)',
+      title: 'Link Text (Arabic)',
       type: 'string',
       hidden: ({ parent }) => parent?.sectionType !== 'additionalPolicy',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'additionalPolicy' && language === 'ar' && !value) {
+        if (sectionType === 'additionalPolicy' && !value) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -383,8 +352,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'additionalPolicy',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'additionalPolicy' && language === 'en' && !value) {
+        if (sectionType === 'additionalPolicy' && !value) {
           return 'This field is required'
         }
         return true
@@ -393,7 +361,7 @@ export default defineType({
     
     defineField({
       name: 'linkUrl',
-      title: 'رابط السياسة',
+      title: 'Policy Link',
       type: 'url',
       hidden: ({ parent }) => parent?.sectionType !== 'additionalPolicy',
       validation: (Rule) => Rule.custom((value, context) => {
@@ -408,13 +376,12 @@ export default defineType({
     // حقول خاصة بإعدادات الموقع
     defineField({
       name: 'siteTitle',
-      title: 'عنوان الموقع (Arabic)',
+      title: 'Site Title (Arabic)',
       type: 'string',
       hidden: ({ parent }) => parent?.sectionType !== 'siteSettings',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'siteSettings' && language === 'ar' && !value) {
+        if (sectionType === 'siteSettings' && !value) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -428,8 +395,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'siteSettings',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'siteSettings' && language === 'en' && !value) {
+        if (sectionType === 'siteSettings' && !value) {
           return 'This field is required'
         }
         return true
@@ -438,13 +404,12 @@ export default defineType({
     
     defineField({
       name: 'siteDescription',
-      title: 'وصف الموقع (Arabic)',
+      title: 'Site Description (Arabic)',
       type: 'text',
       hidden: ({ parent }) => parent?.sectionType !== 'siteSettings',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'siteSettings' && language === 'ar' && !value) {
+        if (sectionType === 'siteSettings' && !value) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -458,8 +423,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'siteSettings',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'siteSettings' && language === 'en' && !value) {
+        if (sectionType === 'siteSettings' && !value) {
           return 'This field is required'
         }
         return true
@@ -468,7 +432,17 @@ export default defineType({
     
     defineField({
       name: 'logo',
-      title: 'شعار الموقع',
+      title: 'Site Logo (Arabic)',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+      hidden: ({ parent }) => parent?.sectionType !== 'siteSettings',
+    }),
+    
+    defineField({
+      name: 'logoEn',
+      title: 'Site Logo (English)',
       type: 'image',
       options: {
         hotspot: true,
@@ -478,13 +452,12 @@ export default defineType({
     
     defineField({
       name: 'footerText',
-      title: 'نص التذييل (Arabic)',
+      title: 'Footer Text (Arabic)',
       type: 'string',
       hidden: ({ parent }) => parent?.sectionType !== 'siteSettings',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'siteSettings' && language === 'ar' && !value) {
+        if (sectionType === 'siteSettings' && !value) {
           return 'هذا الحقل مطلوب'
         }
         return true
@@ -498,8 +471,7 @@ export default defineType({
       hidden: ({ parent }) => parent?.sectionType !== 'siteSettings',
       validation: (Rule) => Rule.custom((value, context) => {
         const sectionType = (context.parent as any)?.sectionType
-        const language = (context.parent as any)?.language
-        if (sectionType === 'siteSettings' && language === 'en' && !value) {
+        if (sectionType === 'siteSettings' && !value) {
           return 'This field is required'
         }
         return true
@@ -508,7 +480,7 @@ export default defineType({
     
     defineField({
       name: 'lastUpdated',
-      title: 'تاريخ آخر تحديث',
+      title: 'Last Updated Date',
       type: 'datetime',
       hidden: ({ parent }) => parent?.sectionType !== 'mainTerms',
       validation: (Rule) => Rule.custom((value, context) => {
@@ -522,7 +494,7 @@ export default defineType({
   ],
   orderings: [
     {
-      title: 'نوع القسم، ثم العنوان',
+      title: 'Section Type, then Title',
       name: 'sectionTypeThenTitle',
       by: [
         { field: 'sectionType', direction: 'asc' },

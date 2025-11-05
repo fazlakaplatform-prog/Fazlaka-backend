@@ -5,85 +5,39 @@ export default defineType({
   title: 'Hero Slider',
   type: 'document',
   fields: [
-    // 1. حقل اللغة (المتحكم الرئيسي)
-    defineField({
-      name: 'language',
-      title: 'Language',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'العربية', value: 'ar' },
-          { title: 'English', value: 'en' }
-        ],
-        layout: 'radio'
-      },
-      initialValue: 'ar',
-      validation: Rule => Rule.required()
-    }),
-
     // --- الحقول العربية ---
-    // تظهر فقط عندما تكون اللغة 'ar'
     defineField({
       name: 'title',
       title: 'Title (Arabic)',
       type: 'string',
       description: 'Title for the slide in Arabic',
-      hidden: ({ document }) => document?.language !== 'ar',
-      validation: Rule =>
-        Rule.custom((value, { document }) => {
-          if (document?.language === 'ar' && !value) {
-            return 'العنوان (العربي) مطلوب'
-          }
-          return true
-        })
+      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'description',
       title: 'Description (Arabic)',
       type: 'text',
       description: 'Description for the slide in Arabic',
-      hidden: ({ document }) => document?.language !== 'ar',
-      validation: Rule =>
-        Rule.custom((value, { document }) => {
-          if (document?.language === 'ar' && !value) {
-            return 'الوصف (العربي) مطلوب'
-          }
-          return true
-        })
+      validation: Rule => Rule.required()
     }),
 
     // --- الحقول الإنجليزية ---
-    // تظهر فقط عندما تكون اللغة 'en'
     defineField({
       name: 'titleEn',
       title: 'Title (English)',
       type: 'string',
       description: 'Title for the slide in English',
-      hidden: ({ document }) => document?.language !== 'en',
-      validation: Rule =>
-        Rule.custom((value, { document }) => {
-          if (document?.language === 'en' && !value) {
-            return 'Title (English) is required'
-          }
-          return true
-        })
+      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'descriptionEn',
       title: 'Description (English)',
       type: 'text',
       description: 'Description for the slide in English',
-      hidden: ({ document }) => document?.language !== 'en',
-      validation: Rule =>
-        Rule.custom((value, { document }) => {
-          if (document?.language === 'en' && !value) {
-            return 'Description (English) is required'
-          }
-          return true
-        })
+      validation: Rule => Rule.required()
     }),
 
-    // --- الحقول المشتركة (لا تتغير) ---
+    // --- الحقول المشتركة ---
     defineField({
       name: 'mediaType',
       title: 'Media Type',
@@ -99,17 +53,31 @@ export default defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
-      name: 'image', // تغيير الاسم من imageUrl إلى image
-      title: 'Image URL',
+      name: 'image',
+      title: 'Image URL (Arabic)',
       type: 'url',
-      description: 'URL for the slide image',
+      description: 'URL for the slide image in Arabic',
+      hidden: ({ document }) => document?.mediaType !== 'image'
+    }),
+    defineField({
+      name: 'imageEn',
+      title: 'Image URL (English)',
+      type: 'url',
+      description: 'URL for the slide image in English',
       hidden: ({ document }) => document?.mediaType !== 'image'
     }),
     defineField({
       name: 'videoUrl',
-      title: 'Video URL',
+      title: 'Video URL (Arabic)',
       type: 'url',
-      description: 'URL for the slide video (e.g., direct .mp4 link, YouTube, Vimeo)',
+      description: 'URL for the slide video in Arabic (e.g., direct .mp4 link, YouTube, Vimeo)',
+      hidden: ({ document }) => document?.mediaType !== 'video'
+    }),
+    defineField({
+      name: 'videoUrlEn',
+      title: 'Video URL (English)',
+      type: 'url',
+      description: 'URL for the slide video in English (e.g., direct .mp4 link, YouTube, Vimeo)',
       hidden: ({ document }) => document?.mediaType !== 'video'
     }),
     
@@ -123,15 +91,13 @@ export default defineType({
           name: 'text',
           title: 'Link Text (Arabic)',
           type: 'string',
-          description: 'Text for the link button in Arabic',
-          hidden: ({ document }) => document?.language !== 'ar'
+          description: 'Text for the link button in Arabic'
         }),
         defineField({
           name: 'textEn',
           title: 'Link Text (English)',
           type: 'string',
-          description: 'Text for the link button in English',
-          hidden: ({ document }) => document?.language !== 'en'
+          description: 'Text for the link button in English'
         }),
         defineField({
           name: 'url',
@@ -153,16 +119,17 @@ export default defineType({
     select: {
       title: 'title',
       titleEn: 'titleEn',
-      image: 'image', // تغيير من imageUrl إلى image
-      mediaType: 'mediaType',
-      language: 'language'
+      image: 'image',
+      imageEn: 'imageEn',
+      mediaType: 'mediaType'
     },
     prepare(selection) {
-      const { title, titleEn, image, mediaType, language } = selection;
+      const { title, titleEn, image, imageEn, mediaType } = selection;
+      const imageUrl = image || imageEn;
       return {
-        title: language === 'en' ? titleEn : title,
-        subtitle: `${mediaType === 'image' ? 'Image' : 'Video'} Slide (${language === 'ar' ? 'Arabic' : 'English'})`,
-        media: mediaType === 'image' && image ? { src: image } : null
+        title: `${title || 'Untitled'} / ${titleEn || 'Untitled'}`,
+        subtitle: `${mediaType === 'image' ? 'Image' : 'Video'} Slide`,
+        media: mediaType === 'image' && imageUrl ? { src: imageUrl } : null
       }
     }
   }

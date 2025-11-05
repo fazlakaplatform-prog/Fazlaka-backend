@@ -1,54 +1,34 @@
-// schema/episode.ts
 import { defineType, defineField, defineArrayMember } from 'sanity'
-import React from 'react' // Import React
+import React from 'react'
 
 export default defineType({
   name: 'episode',
   title: 'Episode',
   type: 'document',
   fields: [
-    // 1. حقل اللغة (المتحكم الرئيسي)
-    defineField({
-      name: 'language',
-      title: 'Language',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'العربية', value: 'ar' },
-          { title: 'English', value: 'en' }
-        ],
-        layout: 'radio'
-      },
-      initialValue: 'ar',
-      validation: (Rule) => Rule.required()
-    }),
-
     // --- الحقول العربية ---
     defineField({
       name: 'title',
       title: 'Title (Arabic)',
       type: 'string',
-      hidden: ({ document }) => document?.language !== 'ar',
-      validation: (Rule) =>
-        Rule.custom((value, { document }) => {
-          if (document?.language === 'ar' && !value) {
-            return 'العنوان (العربي) مطلوب'
-          }
-          return true
-        })
+      validation: (Rule) => Rule.required()
     }),
     defineField({
       name: 'description',
       title: 'Description (Arabic)',
-      type: 'text',
-      hidden: ({ document }) => document?.language !== 'ar'
+      type: 'text'
     }),
     defineField({
       name: 'content',
       title: 'Content (Arabic)',
       type: 'array',
-      of: [defineArrayMember({ type: 'block' })],
-      hidden: ({ document }) => document?.language !== 'ar'
+      of: [defineArrayMember({ type: 'block' })]
+    }),
+    defineField({
+      name: 'thumbnailUrl',
+      title: 'Thumbnail URL (Arabic)',
+      type: 'url',
+      description: 'URL for the episode thumbnail in Arabic'
     }),
 
     // --- الحقول الإنجليزية ---
@@ -56,27 +36,24 @@ export default defineType({
       name: 'titleEn',
       title: 'Title (English)',
       type: 'string',
-      hidden: ({ document }) => document?.language !== 'en',
-      validation: (Rule) =>
-        Rule.custom((value, { document }) => {
-          if (document?.language === 'en' && !value) {
-            return 'Title (English) is required'
-          }
-          return true
-        })
+      validation: (Rule) => Rule.required()
     }),
     defineField({
       name: 'descriptionEn',
       title: 'Description (English)',
-      type: 'text',
-      hidden: ({ document }) => document?.language !== 'en'
+      type: 'text'
     }),
     defineField({
       name: 'contentEn',
       title: 'Content (English)',
       type: 'array',
-      of: [defineArrayMember({ type: 'block' })],
-      hidden: ({ document }) => document?.language !== 'en'
+      of: [defineArrayMember({ type: 'block' })]
+    }),
+    defineField({
+      name: 'thumbnailUrlEn',
+      title: 'Thumbnail URL (English)',
+      type: 'url',
+      description: 'URL for the episode thumbnail in English'
     }),
 
     // --- الحقول المشتركة ---
@@ -85,22 +62,23 @@ export default defineType({
       title: 'Slug',
       type: 'slug',
       options: {
-        source: (doc) => doc.language === 'en' ? 'titleEn' : 'title'
+        source: (doc) => doc.titleEn || doc.title
       },
       validation: (Rule) => Rule.required()
     }),
     defineField({
       name: 'videoUrl',
-      title: 'Video URL',
-      type: 'url'
+      title: 'Video URL (Arabic)',
+      type: 'url',
+      description: 'URL for the video in Arabic'
     }),
     defineField({
-      name: 'thumbnailUrl',
-      title: 'Thumbnail URL',
+      name: 'videoUrlEn',
+      title: 'Video URL (English)',
       type: 'url',
-      description: 'URL for the episode thumbnail'
+      description: 'URL for the video in English'
     }),
-    // --- العلاقات مع التصفية ---
+    // --- العلاقات ---
     defineField({
       name: 'playlists',
       title: 'Playlists',
@@ -108,18 +86,7 @@ export default defineType({
       of: [
         defineArrayMember({
           type: 'reference',
-          to: [{ type: 'playlist' }],
-          // فلترة قوائم التشغيل حسب لغة الحلقة
-          options: {
-            filter: ({ document }) => {
-              const episodeLanguage = document?.language
-              if (!episodeLanguage) return {}
-              return {
-                filter: `language == $lang`,
-                params: { lang: episodeLanguage }
-              }
-            }
-          }
+          to: [{ type: 'playlist' }]
         })
       ]
     }),
@@ -127,18 +94,7 @@ export default defineType({
       name: 'season',
       title: 'Season',
       type: 'reference',
-      to: [{ type: 'season' }],
-      // فلترة المواسم حسب لغة الحلقة
-      options: {
-        filter: ({ document }) => {
-          const episodeLanguage = document?.language
-          if (!episodeLanguage) return {}
-          return {
-            filter: `language == $lang`,
-            params: { lang: episodeLanguage }
-          }
-        }
-      }
+      to: [{ type: 'season' }]
     }),
     defineField({
       name: 'articles',
@@ -147,18 +103,7 @@ export default defineType({
       of: [
         defineArrayMember({
           type: 'reference',
-          to: [{ type: 'article' }],
-          // فلترة المقالات حسب لغة الحلقة
-          options: {
-            filter: ({ document }) => {
-              const episodeLanguage = document?.language
-              if (!episodeLanguage) return {}
-              return {
-                filter: `language == $lang`,
-                params: { lang: episodeLanguage }
-              }
-            }
-          }
+          to: [{ type: 'article' }]
         })
       ]
     }),
@@ -172,25 +117,26 @@ export default defineType({
     select: {
       title: 'title',
       titleEn: 'titleEn',
-      language: 'language',
-      thumbnailUrl: 'thumbnailUrl'
+      thumbnailUrl: 'thumbnailUrl',
+      thumbnailUrlEn: 'thumbnailUrlEn'
     },
     prepare(selection) {
-      const { title, titleEn, language, thumbnailUrl } = selection
-      const displayTitle = language === 'en' ? titleEn : title
+      const { title, titleEn, thumbnailUrl, thumbnailUrlEn } = selection
+      const displayTitle = `${title || 'Untitled'} / ${titleEn || 'Untitled'}`
 
       const PreviewImage = () => {
-        if (!thumbnailUrl) return null
+        const imageUrl = thumbnailUrl || thumbnailUrlEn
+        if (!imageUrl) return null
         return React.createElement('img', {
-          src: thumbnailUrl,
+          src: imageUrl,
           style: { objectFit: 'cover', width: '100%', height: '100%' },
           alt: displayTitle || 'Preview'
         })
       }
 
       return {
-        title: displayTitle || 'Untitled',
-        media: PreviewImage // Pass the component, not the URL string
+        title: displayTitle,
+        media: PreviewImage
       }
     }
   }
